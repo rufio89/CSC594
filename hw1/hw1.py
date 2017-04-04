@@ -1,44 +1,65 @@
 import re
 import sys
-from nltk import sent_tokenize 
+from nltk import sent_tokenize
 import nltk
 
 FILE_NAME = sys.argv[1]
 
 def process_text():
-        print "Process Text"+ FILE_NAME
-        fp = open(FILE_NAME)
-        content = fp.read()
-        FILE_CONTENT = sent_tokenize(content)
-	return FILE_CONTENT
+    fp = open(FILE_NAME)
+    content = fp.read()
+    return content
+
+def process_text_tokenize():
+    fp = open(FILE_NAME)
+    content = fp.read()
+    content = tokenize(content)
+    print content
+    return content
+
+
+#This will tokenize words and remove leading and trailing punctuation into tokens
+def tokenize(content):
+    contractions = {"n't":"not", "'ll":"will", "'ve":"have", "'d":"would", "'re":"are"}
+    tokens = re.findall(r"^[^\w\s]+|[A-Za-z'-]+|[^\w\s]", content)
+    print tokens
+
+
+
+
 
 def get_number_of_paragraphs(file_content):
-        print "Get Paragraphs"
-	for word in file_content:
-		print word
+    print "of paragraphs"
+    split = file_content.split("\n\n")
+    count = 0
+    for paragraph in enumerate(split, 1):
+        count += 1
+    print count
 
 
-def get_number_of_sentences():
-        print "Get number of sentences"
+def get_number_of_sentences(file_content):
+    print "of sentences"
+    num_sentences = len(re.findall(r'[?!.]+', file_content))
+    print num_sentences
 
 
-def get_number_of_words():
-        print "get number of words"
+def get_number_of_words(file_content):
+    print "of tokens"
 
 
 
 def get_number_of_distinct_words():
-        print "Get number of distinct words"
+    print "of types"
 
 
 def get_word_frequency(word):
-        print "Get word " + word + " frequency"
+    print "Get word " + word + " frequency"
 
 
-
-FILE_CONTENT = process_text()
-get_number_of_paragraphs(FILE_CONTENT)
-get_number_of_sentences()
-get_number_of_words()
+tokenized = process_text_tokenize()
+non_tokenized = process_text()
+#get_number_of_paragraphs(non_tokenized)
+#get_number_of_sentences(non_tokenized)
+get_number_of_words(tokenized)
 get_number_of_distinct_words()
 get_word_frequency("THIS")
