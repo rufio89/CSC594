@@ -17,10 +17,17 @@ def process_text_tokenize():
     print content
     return content
 
+def expand_contractions(s, contractions_re, contractions_dict):
+        def replace(match):
+            return contractions_dict[match.group(0)]
+        return contractions_re.sub(replace, s)
 
 #This will tokenize words and remove leading and trailing punctuation into tokens
 def tokenize(content):
-    contractions = {"n't":"not", "'ll":"will", "'ve":"have", "'d":"would", "'re":"are"}
+    contractions = {"n't":" not", "'ll":" will", "'ve":" have", "'d":" would", "'re":" are", }
+    contractions_re = re.compile('(%s)' % '|'.join(contractions.keys()))
+    content = re.sub(r"(I'm)", "I am", content)
+    content = expand_contractions(content, contractions_re, contractions)
     tokens = re.findall(r"^[^\w\s]+|[A-Za-z'-]+|[^\w\s]", content)
     print tokens
 
