@@ -17,6 +17,20 @@ def process_text_tokenize():
     print content
     return content
 
+def expand_posessives(content):
+    posessives = re.findall(r"(?=\S*['])([a-zA-Z'-]+)", content)
+    posessive_tokens = {}
+    for posessive in posessives:
+        posessive_tokens[posessive] = posessive.split("'")
+
+    for key, value in posessive_tokens.iteritems():
+        content = expand_other(key, str(value[0] + " " + value[1]), content)
+    return content
+
+def expand_other(contraction, expanded, content):
+    contraction_re = re.compile('(%s)' % contraction)
+    return re.sub(contraction_re, expanded, content)
+
 def expand_contractions(s, contractions_re, contractions_dict):
         def replace(match):
             return contractions_dict[match.group(0)]
@@ -24,11 +38,16 @@ def expand_contractions(s, contractions_re, contractions_dict):
 
 #This will tokenize words and remove leading and trailing punctuation into tokens
 def tokenize(content):
-    contractions = {"n't":" not", "'ll":" will", "'ve":" have", "'d":" would", "'re":" are", }
+    other_contractions={"I'm": "I am", "He's": "He is", "She's": "She is", "It's": "It is"}
+    contractions = {"n't": " not", "'ll": " will", "'ve": " have", "'d": " would", "'re": " are", }
     contractions_re = re.compile('(%s)' % '|'.join(contractions.keys()))
-    content = re.sub(r"(I'm)", "I am", content)
+    for key, value in other_contractions.iteritems():
+        content = expand_other(key, value, content)
+        content = expand_other(key.lower(), value.lower(), content)
     content = expand_contractions(content, contractions_re, contractions)
-    tokens = re.findall(r"^[^\w\s]+|[A-Za-z'-]+|[^\w\s]", content)
+    content = expand_posessives(content)
+    tokens = re.findall(r"^[^\w\s]+|[A-Za-z0-9'-]+|[^\w\s]", content)
+
     print tokens
 
 
