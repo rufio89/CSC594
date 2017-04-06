@@ -17,26 +17,23 @@ def process_text_tokenize():
     return content
 
 def expand_posessives(content):
-    posessives = re.findall(r"(?=\S*['])([a-zA-Z'-]+)", content)
+    posessives = re.findall(r"([a-zA-Z'-]+\'s)", content)
     posessive_tokens = {}
     for posessive in posessives:
-        #posessive_tokens[posessive] = [posessive.split("'")[0], "'" + posessive.split("'")[1]]
-        print posessive.split("'")
+        posessive_tokens[posessive] = [posessive.split("'")[0], "'" + posessive.split("'")[1]]
 
     for key, value in posessive_tokens.iteritems():
-#       content = expand_other(key, str(value[0] + " " + value[1]), content)
-        print key
-        print value
+        content = expand(key, str(value[0] + " " + value[1]), content)
     return content
 
-def expand_personal_pronouns(content):
-    other_contractions={"I'm": "I am", "He's": "He is", "She's": "She is", "It's": "It is"}
+def expand_other(content):
+    other_contractions={"Here's": "Here is", "What's": "What is", "Who's": "Who is", "Let's": "Let us", "That's": " That is", "There's": "There is", "I'm": "I am", "He's": "He is", "She's": "She is", "It's": "It is"}
     for key, value in other_contractions.iteritems():
-        content = expand_other(key, value, content)
-        content = expand_other(key.lower(), value.lower(), content)
+        content = expand(key, value, content)
+        content = expand(key.lower(), value.lower(), content)
     return content
 
-def expand_other(contraction, expanded, content):
+def expand(contraction, expanded, content):
     contraction_re = re.compile('(%s)' % contraction)
     return re.sub(contraction_re, expanded, content)
 
@@ -49,9 +46,9 @@ def expand_contractions(s):
 
 #This will tokenize words and remove leading and trailing punctuation into tokens
 def tokenize(content):
-    content = expand_personal_pronouns(content)
+    content = expand_other(content)
     content = expand_contractions(content)
-    #content = expand_posessives(content)
+    content = expand_posessives(content)
     tokens = re.findall(r"^[^\w\s]+|[A-Za-z0-9'-]+|[^\w\s]", content)
     return tokens
 
@@ -85,12 +82,11 @@ def get_number_of_distinct_words(file_content):
 def get_word_frequency(token_list, f):
     frequency_dict= {}
     freq_list = []
-    for word in token_list:
-        frequency_dict[word] = token_list.count(word)
-    sorted_frequency = sorted(frequency_dict.items(), key=lambda x: (-x[1], x[0]))
-    for item in sorted_frequency:
-        freq_list.append(str(item[0]) + " " + str(item[1]) + "\n")
+    token_list = sorted(token_list)
+    for i in token_list:
+        print(i, token_list.count(i))
 
+    return freq_list
 
 
 
@@ -103,7 +99,7 @@ def parse_and_print():
     f.write(get_number_of_words(tokenized))
     f.write(get_number_of_distinct_words(tokenized))
     f.write('=======================================================\n')
-    f.write(get_word_frequency(tokenized, f))
+    get_word_frequency(tokenized, f)
     f.close()
 
 
