@@ -1,18 +1,22 @@
+#RYAN KRIENITZ
 import re
 import sys
+from collections import Counter
 from nltk import sent_tokenize
-import nltk
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
-FILE_NAME = sys.argv[1]
+INPUT_FILE_NAME = sys.argv[1]
+OUTPUT_FILE_NAME =  sys.argv[2]
 
 def process_text():
-    fp = open(FILE_NAME)
-    content = fp.read()
+    fp = open(INPUT_FILE_NAME)
+    content = fp.read().decode('utf8')
     return content
 
 def process_text_tokenize():
-    fp = open(FILE_NAME)
-    content = fp.read()
+    fp = open(INPUT_FILE_NAME)
+    content = fp.read().decode('utf8')
     content = tokenize(content)
     return content
 
@@ -65,9 +69,14 @@ def get_number_of_paragraphs(file_content):
 
 
 def get_number_of_sentences(file_content):
+    acronyms = ["Dr.", "D.J.", "Mr."]
+    count = 0
+    for item in file_content:
+        if not item.rsplit(None, 1)[-1] in acronyms:
+            count +=1
 
-    num_sentences = len(re.findall(r'[?!.]+', file_content))
-    return "# of sentences = "  + str(num_sentences) + "\n"
+    return "# of sentences = " + str(count) + "\n"
+
 
 
 def get_number_of_words(file_content):
@@ -80,22 +89,19 @@ def get_number_of_distinct_words(file_content):
 
 
 def get_word_frequency(token_list, f):
-    frequency_dict= {}
-    freq_list = []
-    token_list = sorted(token_list)
-    for i in token_list:
-        print(i, token_list.count(i))
-
-    return freq_list
+    freq_list = dict(Counter(token_list))
+    sorted_tokens = sorted(freq_list.iteritems(), key=lambda kv: kv[1], reverse=True)
+    for key, value in sorted_tokens:
+        f.write(str(key) + " " +  str(value) + "\n")
 
 
 
 def parse_and_print():
     tokenized = process_text_tokenize()
     non_tokenized = process_text()
-    f = open('output-' + FILE_NAME + '', 'w')
+    f = open(OUTPUT_FILE_NAME, 'w')
     f.write(get_number_of_paragraphs(non_tokenized))
-    f.write(get_number_of_sentences(non_tokenized))
+    f.write(get_number_of_sentences(sent_tokenize(non_tokenized)))
     f.write(get_number_of_words(tokenized))
     f.write(get_number_of_distinct_words(tokenized))
     f.write('=======================================================\n')
