@@ -12,8 +12,12 @@ def process_text():
     content = fp.read()
     return content
 
-def add_tokens():
+def get_sentences():
     sentences = sent_tokenize(process_text())
+    return sentences
+
+
+def add_tokens(sentences):
     new_sentences = ""
     for s in sentences:
         new_sentences += "<s>" + s + "</s>"
@@ -58,13 +62,67 @@ def get_unique(words):
     return new_list
 
 
+def get_unigram_set(words):
+    word_count_dict = {}
+    new_list = []
 
-words = word_tokenize(add_tokens())
+    for token in words:
+        if token not in new_list:
+            new_list.append(token)
+            word_count_dict[token] = 1
+        else:
+            word_count_dict[token] = word_count_dict[token] + 1
+    del word_count_dict["<s>"]
+    return word_count_dict
+
+def get_unigram_count(unigram_dict):
+    n_val = 0
+    for key, val in unigram_dict.iteritems():
+        n_val+= val;
+
+    return n_val
+
+def get_unigram_probabilties(unique_words, unigram_dict, n):
+    new_tokens = unique_words
+    unigram_probability_dict = {}
+    i=0
+    new_tokens.remove("<s>")
+    for index, value in enumerate(new_tokens):
+       unigram_probability_dict[value] = unigram_dict[value] / n
+
+    print unigram_probability_dict
+
+#SENTENCES
+sentences = get_sentences()
+num_sentences = len(sentences)
+#TOKENIZED LIST
+words = word_tokenize(add_tokens(sentences))
+#CREATES ACTUAL TOKEN SYMBOLS BECAUSE THEY GET SPLIT
+#THIS IS GOOD LIST OF TOKENS TO LOOP THROUGH
 words = replace_token_symbols(words)
-unique_words = get_unique(words)
 
-print words
-print unique_words
+#GETS THE UNIQUE SET
+unique_words = get_unique(words)
+#UNIGRAM VARS
+unigram_dict = get_unigram_set(words)
+unigram_n_count = get_unigram_count(unigram_dict)
+unigram_v_count = len(unigram_dict)
+
+
+
+# print num_sentences
+# print unigram_dict
+# print unigram_n_count
+# print unigram_v_count
+get_unigram_probabilties(unique_words, unigram_dict, unigram_n_count)
+
+
+
+
+
+
+
+
 
 
 
