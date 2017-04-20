@@ -62,7 +62,7 @@ def get_unique(words):
     return new_list
 
 
-def get_unigram_set(words):
+def get_unigram_count(words):
     word_count_dict = {}
     new_list = []
 
@@ -75,7 +75,7 @@ def get_unigram_set(words):
     del word_count_dict["<s>"]
     return word_count_dict
 
-def get_unigram_count(unigram_dict):
+def get_unigram_n(unigram_dict):
     n_val = 0
     for key, val in unigram_dict.iteritems():
         n_val+= val;
@@ -88,9 +88,50 @@ def get_unigram_probabilties(unique_words, unigram_dict, n):
     i=0
     new_tokens.remove("<s>")
     for index, value in enumerate(new_tokens):
-       unigram_probability_dict[value] = unigram_dict[value] / n
+        unigram_probability_dict[value] = float(unigram_dict[value]) / float(n)
+    return unigram_probability_dict
 
-    print unigram_probability_dict
+
+def get_bigram_count(words):
+    new_list = []
+    bigram_count_dict = {}
+    first = ""
+    second = ""
+    phrase = ""
+    index = 0
+    while index < len(words)-1:
+        first = words[index]
+        second = words[index+1]
+        phrase = (first, second)
+        if phrase in new_list:
+            bigram_count_dict[phrase] = bigram_count_dict[phrase] + 1
+        else:
+            bigram_count_dict[phrase] = 1
+            new_list.append(phrase)
+        index+=1
+    del bigram_count_dict[("</s>", "<s>")]
+    return bigram_count_dict
+
+
+def get_bigram_probabilties(unique_words, bigram_counts, unigram_counts):
+    new_bigram_counts = bigram_counts
+    bigram_probability_dict = {}
+    for key, value in bigram_counts.iteritems():
+        first_token = key[0]
+        second_token = key[1]
+        bigram_count = value
+        phrase = (first_token, second_token)
+        # print "FIRST: " + str(first_token)
+        # print "SECOND: " + str(second_token)
+        # print "bigram_count: " + str(bigram_count)
+        # print "PHRASE: " + str(phrase)
+        if first_token == "<s>":
+            first_token = "</s>"
+        unigram_count = unigram_counts[first_token]
+        bigram_probability = float(bigram_count) / float(unigram_count)
+        bigram_probability_dict[phrase] = bigram_probability
+    print bigram_probability_dict
+
 
 #SENTENCES
 sentences = get_sentences()
@@ -104,19 +145,19 @@ words = replace_token_symbols(words)
 #GETS THE UNIQUE SET
 unique_words = get_unique(words)
 #UNIGRAM VARS
-unigram_dict = get_unigram_set(words)
-unigram_n_count = get_unigram_count(unigram_dict)
-unigram_v_count = len(unigram_dict)
+unigram_counts = get_unigram_count(words)
+unigram_n_count = get_unigram_n(unigram_counts)
+unigram_v_count = len(unigram_counts)
 
 
 
 # print num_sentences
-# print unigram_dict
+# print unigram_counts
 # print unigram_n_count
 # print unigram_v_count
-get_unigram_probabilties(unique_words, unigram_dict, unigram_n_count)
-
-
+unigram_probabilities = get_unigram_probabilties(unique_words, unigram_counts, unigram_n_count)
+bigram_counts = get_bigram_count(words)
+get_bigram_probabilties(unique_words, bigram_counts, unigram_counts)
 
 
 
