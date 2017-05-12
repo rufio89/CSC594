@@ -1,3 +1,4 @@
+#RYAN KRIENITZ
 from nltk.tokenize import sent_tokenize, word_tokenize, TreebankWordTokenizer
 from nltk.corpus import stopwords
 from nltk import bigrams, FreqDist, ngrams
@@ -30,9 +31,9 @@ tokenizer.PUNCTUATION = [
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-INPUT_FILE_NAME_TEST = sys.argv[2]
 INPUT_FILE_NAME_TRAIN = sys.argv[1]
-
+INPUT_FILE_NAME_TEST = sys.argv[2]
+OUTPUT_FILE_NAME = sys.argv[3]
 
 def expand_contractions(s):
     contractions = {"n't": " not", "'ll": " will", "'ve": " have", "'d": " would", "'re": " are", }
@@ -61,39 +62,10 @@ def add_tokens(sentences):
     return new_sentences
 
 
-
-
-# def replace_token_symbols(words):
-#     word_total = len(words)
-#     index = 0
-#     while index < word_total:
-#         period_index = 0;
-#         first = words[int(index)]
-#         second = words[int(index) + 1]
-#         third = words[int(index) + 2]
-#         new_token = ""
-#         if first == "<" and second == "s" and third == ">":
-#             new_token = ''.join(words[int(index):int(index)+3])
-#             words[int(index)] = new_token
-#             words.remove(second)
-#             words.remove(third)
-#             word_total = word_total - 2
-#         if first == "<" and second == "/s" and third == ">":
-#             period = words[int(index)-1][len(words[int(index)-1])-1]
-#             words[int(index) - 1]  =  words[int(index) - 1][0:len(words[int(index)-1])-1]
-#
-#             new_token = ''.join(words[int(index):int(index) + 3])
-#             words[int(index)] = period
-#             words[int(index)+1] = new_token
-#             words.remove(third)
-#             word_total = word_total - 2
-#         index = index + 1
-#     return words
-
 def get_unique(words):
     new_list = []
     for token in words:
-        if token not in new_list:
+        if str(token) not in new_list:
             new_list.append(token)
 
     return new_list
@@ -115,10 +87,10 @@ def get_unigram_count(words):
 def get_unigram_n(unigram_dict):
     n_val = 0
     for key, val in unigram_dict.iteritems():
-        n_val+= val;
+        n_val+= val
     return n_val
 
-def get_unigram_probabilties(unique_words, unigram_dict, n):
+def get_unigram_probabilities(unique_words, unigram_dict, n):
     new_tokens = unique_words
     unigram_probability_dict = {}
     i=0
@@ -133,22 +105,16 @@ def get_bigram_count(bigrams):
     bigram_count_dict = {}
     for k, v in bigram_freq_dist.items():
         bigram_count_dict[k] =  v
-    del bigram_count_dict[("</s>", "<s>")]
     return bigram_count_dict
 
 
-def get_bigram_probabilties(unique_words, bigram_counts, unigram_counts):
-    new_bigram_counts = bigram_counts
+def get_bigram_probabilties(bigram_counts, unigram_counts):
     bigram_probability_dict = {}
     for key, value in bigram_counts.iteritems():
         first_token = key[0]
         second_token = key[1]
         bigram_count = value
         phrase = (first_token, second_token)
-        # print "FIRST: " + str(first_token)
-        # print "SECOND: " + str(second_token)
-        # print "bigram_count: " + str(bigram_count)
-        # print "PHRASE: " + str(phrase)
         if first_token == "<s>":
             first_token = "</s>"
         unigram_count = unigram_counts[first_token]
@@ -161,14 +127,9 @@ def get_sentence_unigram_probabilities(tokens, unigram_probabilities):
     total_probability = 0.0
     probabilty_dict = {}
     for index, token in enumerate(tokens):
-        if token not in unigram_probabilities:
+        if token not in unigram_probabilities and index !=0:
             probability = 0.0
             total_probability += probability
-            probabilty_dict[token] = exp(probability)
-        elif index == 0 and token == "<s>":
-            new_token = "</s>"
-            probability = unigram_probabilities[new_token]
-            total_probability = probability
             probabilty_dict[token] = exp(probability)
         elif token =="<s>":
             new_token = "</s>"
@@ -185,8 +146,6 @@ def get_sentence_unigram_probabilities(tokens, unigram_probabilities):
 def get_sentence_bigram_probabilties(tokens, bigram_probabilties):
     total_probability = 0.0
     probabilty_dict = {}
-    first = ""
-    second = ""
     index = 0
     while index < len(tokens)-1:
         token = tokens[index]
@@ -206,14 +165,16 @@ def get_sentence_bigram_probabilties(tokens, bigram_probabilties):
     return total_probability
 
 
+
+
+
 #SENTENCES
 training_sentences = get_sentences(INPUT_FILE_NAME_TRAIN)
 test_sentences = get_sentences(INPUT_FILE_NAME_TEST)
 num_sentences = len(training_sentences)
 #TOKENIZED LIST
 tokens = tokenizer.tokenize(add_tokens(training_sentences))
-#CREATES ACTUAL TOKEN SYMBOLS BECAUSE THEY GET SPLIT
-#THIS IS GOOD LIST OF TOKENS TO LOOP THROUGH
+
 
 
 
@@ -227,29 +188,33 @@ unigram_v_count = len(unigram_counts)
 bigrams = bigrams(tokens)
 
 
-unigram_probabilities = get_unigram_probabilties(unique_words, unigram_counts, unigram_n_count)
+unigram_probabilities = get_unigram_probabilities(unique_words, unigram_counts, unigram_n_count)
 bigram_counts = get_bigram_count(bigrams)
-bigram_probabilties = get_bigram_probabilties(unique_words, bigram_counts, unigram_counts)
+bigram_probabilties = get_bigram_probabilties(bigram_counts, unigram_counts)
 
 
 
 
 
 def print_results():
+    f = open(OUTPUT_FILE_NAME, 'w')
     for index, sentence in enumerate(test_sentences):
         new_sentence = "<s>" + sentence + "</s>"
         test_tokens = tokenizer.tokenize(new_sentence)
         unigram_sentence_probability = get_sentence_unigram_probabilities(test_tokens, unigram_probabilities)
         bigram_sentence_probability = get_sentence_bigram_probabilties(test_tokens, bigram_probabilties)
-        print "Sentence " + str(index) + ": " + sentence + "\n"
-        print "unigram [Prob]" + str(unigram_sentence_probability)
-        print "bigram [Prob]" + str(bigram_sentence_probability)
-        print ""
+        f.write("Sentence " + str(index) + ": " + sentence)
+        f.write("\n\n")
+        f.write("unigram [Prob]" + str(unigram_sentence_probability))
+        f.write("\n")
+        f.write("bigram [Prob]" + str(bigram_sentence_probability))
+        f.write("\n\n\n")
+    f.close()
+
+
+
 
 print_results()
-
-
-
 
 
 

@@ -1,0 +1,18 @@
+Sentence 0: I am Sam.
+
+unigram [Prob]5.0625e-06
+bigram [Prob]0.111111111111
+
+
+Sentence 1: Sam I am.
+
+unigram [Prob]5.0625e-06
+bigram [Prob]0.0555555555556
+
+
+Sentence 2: I do not like green eggs and ham.
+
+unigram [Prob]3.955078125e-13
+bigram [Prob]0.222222222222
+
+
