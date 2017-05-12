@@ -11,8 +11,16 @@ from pprint import pprint
 
 INPUT_FILE_NAME_TRAIN = sys.argv[1]
 INPUT_FILE_NAME_TEST = sys.argv[2]
-POS_TYPES = []
+INPUT_FILE_NAME_TAGS = sys.argv[3]
+POS_TAGS = []
 
+def process_tags():
+    fp = open(INPUT_FILE_NAME_TAGS)
+    content = fp.read()
+    tags = []
+    for u in content.split():
+        tags.append(u)
+    return tags
 
 def process_training_text(file_name):
     train_sents = conll2000.chunked_sents(os.getcwd() + "/" + file_name)
@@ -71,6 +79,8 @@ def get_bigram_dict(bigrams):
     return bigram_dict
 
 
+
+POS_TAGS = process_tags()
 #TRAIN VARS
 train_sents = process_training_text(INPUT_FILE_NAME_TRAIN)
 train_word_pos = get_word_pos(train_sents)
@@ -140,12 +150,17 @@ print len(train_num_of_words)
 print len(set(train_num_of_words))
 
 
-def parse_unkowns(train, test):
-    for k, v in test.items():
-        if k not in train:
-            new_key = "<UNK>|" + k[k.index('|')+1:len(k)]
-            test[new_key] = test.pop(k)
-parse_unkowns(train_word_pos_bigram_dict, test_word_pos_bigram_dict)
+
+
+def parse_unkowns(train, train_pos, train_unigram_dict):
+    new_train = train
+    new_unigram = train_unigram_dict
+    for item in POS_TAGS:
+        if item not in train_pos:
+            new_train["<UNK>|" + str(item)] = 1
+            new_unigram[str(item)] = 1
+    return new_train, new_unigram
+
 
 def transition_prob(bigram_freq_dist, unigram_dict):
     trans_probability_dict = {}
@@ -178,4 +193,5 @@ def emission_prob(test_word_bigram_freq_dist, unigram_dict):
             emission_probability_dict[phrase] = probability
     return emission_probability_dict
 
-pprint(emission_prob(test_word_pos_bigram_dict, train_unigram_dict))
+emission_train, emission_unigram = parse_unkowns(train_word_pos_bigram_dict, train_pos, train_unigram_dict)
+pprint(emission_prob(emission_train, emission_unigram))
