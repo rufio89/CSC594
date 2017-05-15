@@ -6,7 +6,7 @@ class Decoder(object):
         self.N = initialProb.shape[0]
         self.initialProb = initialProb
         self.transProb = transProb
-        self.obsProb = obsProb
+        self.obsProb = obsProb      
         assert self.initialProb.shape == (self.N, 1)
         assert self.transProb.shape == (self.N, self.N)
         assert self.obsProb.shape[0] == self.N

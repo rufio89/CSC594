@@ -194,4 +194,20 @@ def emission_prob(test_word_bigram_freq_dist, unigram_dict):
     return emission_probability_dict
 
 emission_train, emission_unigram = parse_unkowns(train_word_pos_bigram_dict, train_pos, train_unigram_dict)
-pprint(emission_prob(emission_train, emission_unigram))
+#emission_probs = emission_prob(emission_train, emission_unigram)
+
+sentences = {}
+sentences = []
+
+for index, item in enumerate(test_word_pos):
+    non_spaced = ["``","<s>","</s>",".","''"]
+    if item[0] not in non_spaced and test_word_pos[index+1][0] != ".":
+        sentences.append(item[0])
+    else:
+        if item[0] != "``" and item[0] != "''":
+            sentences.append(item[0])
+
+
+
+print sentences
+
